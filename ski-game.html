@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skiing Game</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #87CEEB;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      margin: 20px 0 10px;
+      font-size: 2.5rem;
+      color: #333;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: white;
+      border: 3px solid #000;
+    }
+    #startScreen {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(135, 206, 235, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    #startButton {
+      padding: 20px 40px;
+      font-size: 1.5em;
+      background-color: #4682B4;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    #message {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2em;
+      color: red;
+      display: none;
+      z-index: 10;
+    }
+    #scoreDisplay, #highScoreDisplay {
+      position: absolute;
+      top: 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+      z-index: 5;
+    }
+    #scoreDisplay { left: 10px; }
+    #highScoreDisplay { right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>⛷️ Shred the Slopes</h1>
+  <div id="startScreen">
+    <button id="startButton">Start Game</button>
+  </div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="message">You hit a tree! Try again!</div>
+  <div id="scoreDisplay">Score: 0</div>
+  <div id="highScoreDisplay">High Score: 0</div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const skier = { x: 400, y: 500, width: 24, height: 36 };
+    const obstacles = [];
+    let score = 0;
+    let highScore = localStorage.getItem('highScore') || 0;
+    let gameStarted = false;
+    let gameOver = false;
+    let speed = 5;
+
+    function drawFinishLine() {
+      for (let i = 0; i < canvas.width; i += 40) {
+        ctx.fillStyle = (i / 40) % 2 === 0 ? 'black' : 'white';
+        ctx.fillRect(i, 0, 40, 10);
+      }
+    }
+
+    function drawSkier() {
+      ctx.fillStyle = '#FFDAB9'; // face
+      ctx.fillRect(skier.x + 6, skier.y, 8, 8);
+      ctx.fillStyle = 'red'; // hat
+      ctx.fillRect(skier.x + 5, skier.y - 3, 10, 4);
+      ctx.fillRect(skier.x + 7, skier.y - 5, 6, 2);
+      ctx.fillStyle = 'blue'; // body
+      ctx.fillRect(skier.x + 4, skier.y + 8, 12, 14);
+      ctx.fillRect(skier.x, skier.y + 8, 4, 12); // left arm
+      ctx.fillRect(skier.x + 16, skier.y + 8, 4, 12); // right arm
+      ctx.fillRect(skier.x + 4, skier.y + 22, 5, 10); // legs
+      ctx.fillRect(skier.x + 11, skier.y + 22, 5, 10);
+      ctx.fillStyle = 'saddlebrown'; // skis
+      ctx.fillRect(skier.x - 4, skier.y + 32, 12, 3);
+      ctx.fillRect(skier.x + 12, skier.y + 32, 12, 3);
+    }
+
+    function drawObstacles() {
+      obstacles.forEach(ob => {
+        ctx.fillStyle = 'green';
+        ctx.beginPath();
+        ctx.moveTo(ob.x + ob.width / 2, ob.y);
+        ctx.lineTo(ob.x, ob.y + ob.height);
+        ctx.lineTo(ob.x + ob.width, ob.y + ob.height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'brown';
+        ctx.fillRect(ob.x + ob.width / 3, ob.y + ob.height, ob.width / 3, ob.height / 2);
+      });
+    }
+
+    function updateObstacles() {
+      obstacles.forEach(ob => {
+        ob.y += speed;
+        if (ob.y > canvas.height) {
+          ob.y = -ob.height;
+          ob.x = Math.random() * (canvas.width - ob.width);
+          score++;
+          document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+        }
+      });
+    }
+
+    function checkCollision() {
+      for (let ob of obstacles) {
+        if (
+          skier.x < ob.x + ob.width &&
+          skier.x + skier.width > ob.x &&
+          skier.y < ob.y + ob.height &&
+          skier.y + skier.height > ob.y
+        ) {
+          gameOver = true;
+          document.getElementById('message').style.display = 'block';
+          updateHighScore();
+          setTimeout(resetGame, 3000);
+        }
+      }
+    }
+
+    function updateHighScore() {
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+      }
+      document.getElementById('highScoreDisplay').textContent = `High Score: ${highScore}`;
+    }
+
+    function resetGame() {
+      gameStarted = false;
+      gameOver = false;
+      document.getElementById('startScreen').style.display = 'flex';
+      document.getElementById('message').style.display = 'none';
+      score = 0;
+      document.getElementById('scoreDisplay').textContent = `Score: 0`;
+    }
+
+    function gameLoop() {
+      if (!gameStarted || gameOver) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawFinishLine();
+      drawSkier();
+      drawObstacles();
+      updateObstacles();
+      checkCollision();
+      speed = 5 + score / 10;
+      requestAnimationFrame(gameLoop);
+    }
+
+    canvas.addEventListener('mousemove', e => {
+      if (!gameStarted) return;
+      const rect = canvas.getBoundingClientRect();
+      skier.x = e.clientX - rect.left - skier.width / 2;
+      skier.y = e.clientY - rect.top - skier.height / 2;
+    });
+
+    function initializeObstacles() {
+      obstacles.length = 0;
+      for (let i = 0; i < 10; i++) {
+        obstacles.push({
+          x: Math.random() * (canvas.width - 50),
+          y: Math.random() * -600,
+          width: 50,
+          height: 50
+        });
+      }
+    }
+
+    document.getElementById('startButton').addEventListener('click', () => {
+      initializeObstacles();
+      gameStarted = true;
+      gameOver = false;
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('message').style.display = 'none';
+      gameLoop();
+    });
+
+    document.getElementById('highScoreDisplay').textContent = `High Score: ${highScore}`;
+  </script>
+</body>
+</html>
+

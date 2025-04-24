@@ -1,0 +1,88 @@
+
+body {
+    background-color: #fdf5e6; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #111;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+nav {
+    background-color: #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: #222;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #0066cc;
+}
+
+
+header {
+    text-align: center;
+    padding: 20px;
+    background-color: #eee;
+}
+
+header h1 {
+    font-size: 3em;
+    margin: 0;
+    color: #444;
+}
+
+header nav a {
+    margin: 0 15px;
+}
+
+/* Section Styling */
+main section {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fffdf7;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+main section h2 {
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+main section ul, main section ol {
+    padding-left: 20px;
+}
+
+.video-container,
+.tableau-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 40px;
+}
+
+footer a {
+    display: inline-block;
+    background-color: #444;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+footer a:hover {
+    background-color: #222;
+}
